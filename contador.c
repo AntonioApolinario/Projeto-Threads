@@ -3,57 +3,46 @@
 #include<pthread.h>
 #include<stdbool.h>
 
-//Variáveis globais
-#define NTHREADS 3
-int contador = 0;
-
-pthread_t incrementador[NTHREADS];
+#define NUM_THREADS 3
+pthread_t threads[NUM_THREADS];
 
 pthread_mutex_t oMutex = PTHREAD_MUTEX_INITIALIZER;
 
-//A função de thread que ira incrementar o contador
-void *thread(void *idThread);
+int contador = 0;
 
+void *incrementar(void * idThread);
 
 int main(int argc, char *argv[]){
+    int *codigoThread[NUM_THREADS], t;    
 
-    int *codigoThread[NTHREADS], i;
-    
-    
-    for(i=0; i<NTHREADS; i++){
-        codigoThread[i] = (int*)malloc(sizeof(int));
-        *codigoThread[i] = i;
-        pthread_create(&incrementador[i], NULL, thread, (void*)codigoThread[i]);
+    for(t=0; t<NUM_THREADS; t++){
+        codigoThread[t] = (int*)malloc(sizeof(int));
+        *codigoThread[t] = t;
+        pthread_create(&threads[t], NULL, incrementar, (void*)codigoThread[t]);
     }
 
-    for(i=0; i<NTHREADS; i++){
-        pthread_join(incrementador[i], NULL);
-    }
-    
     pthread_exit(NULL);
-    return 0;
 }
 
-
-void *thread(void *idThread){
-    int i, id = *((int*)idThread), codigo;
+void *incrementar(void * idThread){
+    int idT = *((int*)idThread), i;
     while(true){
         pthread_mutex_lock(&oMutex);
         contador++;
-        //printf("Thread %d contador= %d\n", id, contador);
-        if(contador == 1000000){
-            for(i=0; i<NTHREADS; i++){
-                if(i != id){
-                    codigo = pthread_cancel(incrementador[i]);
-                    printf("Codigo do cancelamento %d da thread %d\n", codigo, i);
+        if(contador==1000000){
+            for(i=0; i<NUM_THREADS; i++){
+                if(i!=idT){                    
+                    pthread_cancel(threads[i]);
+                    printf("To aqui %d\n", i);
                 }
             }
-            break;        
+            break;
         }
+        printf("Thread %d Contador = %d\n", idT, contador);      
         pthread_mutex_unlock(&oMutex);
     }
+    printf("Contador = %d\n", contador);
     pthread_mutex_unlock(&oMutex);
-    printf("Thread %d concluiu\n", id);
+    printf("Thread %d conclui, contador = %d\n", idT, contador);
     pthread_exit(NULL);
-    printf("Fechou\n");
 }
