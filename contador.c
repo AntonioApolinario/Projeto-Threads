@@ -1,18 +1,18 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<pthread.h>
-#include<stdbool.h>
 
-#define NUM_THREADS 3
+#define NUM_THREADS 30
 pthread_t threads[NUM_THREADS];
 
 pthread_mutex_t oMutex = PTHREAD_MUTEX_INITIALIZER;
 
-int contador = 0;
+long contador = 0;
 
 void *incrementar(void * idThread);
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[])
+{
     int *codigoThread[NUM_THREADS], t;    
 
     for(t=0; t<NUM_THREADS; t++){
@@ -24,25 +24,19 @@ int main(int argc, char *argv[]){
     pthread_exit(NULL);
 }
 
-void *incrementar(void * idThread){
+void *incrementar(void * idThread)
+{
     int idT = *((int*)idThread), i;
-    while(true){
+    for(i=0; i < 1000000; i++)
+    {
         pthread_mutex_lock(&oMutex);
         contador++;
-        if(contador==1000000){
-            for(i=0; i<NUM_THREADS; i++){
-                if(i!=idT){                    
-                    pthread_cancel(threads[i]);
-                    printf("To aqui %d\n", i);
-                }
-            }
-            break;
+        if(contador == 1000000)
+        {
+            printf("Thread %d conclui, contador = %ld\n", idT, contador);
+            exit(0);
         }
-        printf("Thread %d Contador = %d\n", idT, contador);      
         pthread_mutex_unlock(&oMutex);
-    }
-    printf("Contador = %d\n", contador);
-    pthread_mutex_unlock(&oMutex);
-    printf("Thread %d conclui, contador = %d\n", idT, contador);
+    }    
     pthread_exit(NULL);
 }
