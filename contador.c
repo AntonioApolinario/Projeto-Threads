@@ -36,7 +36,7 @@ void *incrementar(void * idThread){
                     printf("To aqui %d\n", i);
                 }
             }
-            exit (0);
+            break;
         }
         printf("Thread %d Contador = %d\n", idT, contador);      
         pthread_mutex_unlock(&oMutex);
