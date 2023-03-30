@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<pthread.h>
 #include<stdbool.h>
+#include<unistd.h>
 
 #define NUM_THREADS 3
 pthread_t threads[NUM_THREADS];
@@ -21,27 +22,34 @@ int main(int argc, char *argv[]){
         pthread_create(&threads[t], NULL, incrementar, (void*)codigoThread[t]);
     }
 
+    for(t=0; t<NUM_THREADS; t++){
+        pthread_join(threads[t], NULL);
+    }
+
     pthread_exit(NULL);
 }
 
 void *incrementar(void * idThread){
-    int idT = *((int*)idThread), i;
+    int idT = *((int*)idThread), i, s;    
     while(true){
-        pthread_mutex_lock(&oMutex);
+        //cancelation point da thread
+        pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+        usleep(0.001);
+        //fim do cancelation point da thread
+        pthread_mutex_lock(&oMutex);        
         contador++;
         if(contador==1000000){
             for(i=0; i<NUM_THREADS; i++){
                 if(i!=idT){                    
                     pthread_cancel(threads[i]);
-                    printf("To aqui %d\n", i);
                 }
             }
             break;
         }
-        printf("Thread %d Contador = %d\n", idT, contador);      
+        //Se descomentar a linha abaixo, é mostrado a execução no contador
+        //printf("Thread %d Contador = %d\n", idT, contador);      
         pthread_mutex_unlock(&oMutex);
     }
-    printf("Contador = %d\n", contador);
     pthread_mutex_unlock(&oMutex);
     printf("Thread %d concluiu, contador = %d\n", idT, contador);
     pthread_exit(NULL);
