@@ -1,12 +1,11 @@
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<pthread.h>
 
 #define PATH_COLOR "imagem.ppm" //caminho da imagem colorida
 #define PATH_CINZA "cinza.ppm" //caminho da imagem em escala de cinza
-#define NUM_THREADS 4
-
-void * calculaCinza(void * idThread);
+//#define NUM_THREADS 4
 
 typedef struct{
     int red, greem, blue;
@@ -17,15 +16,17 @@ typedef struct{
     int width, linha;
 }aux;
 
+void * calculaCinza(void * idThread);
 
 int main(int argc, char *argv[]){
     FILE *colorida, *cinza;
     char formato[2];
     int largura, altura, cor255, i, j;
     pixel **matriz;
-        
+
     colorida = fopen(PATH_COLOR, "r");
     cinza = fopen(PATH_CINZA, "w");
+    
 
     fscanf(colorida, "%s\n", formato);
     fprintf(cinza, "%s\n", formato);
@@ -37,13 +38,15 @@ int main(int argc, char *argv[]){
     fprintf(cinza, "%d\n", cor255);
 
     matriz =  malloc(altura * sizeof(pixel*));
-    for(i=0; i<largura; i++){
+    for(i=0; i<altura; i++){
         matriz[i] = malloc(largura * sizeof(pixel));
     }
 
     for(i=0; i<altura; i++){
-        while(fscanf(colorida, "%d %d %d\n", &matriz[i][j].red, &matriz[i][j].greem, &matriz[i][j].blue) != EOF && j<largura){
-            j++;
+        printf("Linha %d\n", i);
+        for(j=0; j<largura; j++){
+            fscanf(colorida, "%d %d %d\n", &matriz[i][j].red, &matriz[i][j].greem, &matriz[i][j].blue);
+            printf("Vermelho %d, Verde %d, Azul %d\n", matriz[i][j].red, matriz[i][j].greem, matriz[i][j].blue);
         }
     }
 
@@ -54,9 +57,9 @@ int main(int argc, char *argv[]){
     for(i=0; i<altura; i++){
 
         argumentoFunc[i] = (aux*)malloc(sizeof(aux));
-        *argumentoFunc[i]->linha = i;
-        *argumentoFunc[i]->mat = matriz;
-        *argumentoFunc[i]->width = largura;
+        argumentoFunc[i]->linha = i;
+        argumentoFunc[i]->mat = matriz;
+        argumentoFunc[i]->width = largura;
         pthread_create(&threads[i], NULL, calculaCinza, (void*)argumentoFunc[i]);
     }
 
@@ -65,20 +68,22 @@ int main(int argc, char *argv[]){
             fprintf(cinza, "%d %d %d\n", matriz[i][j].red, matriz[i][j].greem, matriz[i][j].blue);
         }
     }
+    /* for(i=0; i<10)
+    free(matriz); */
 
     pthread_exit(NULL);
 }
 
 void * calculaCinza(void * idThread){
-    aux idT = *((aux*) idThread), j, cinza;
-    int linha = idT.linha;
-    pixel *mat = idT.mat[linha]
+    aux idT = *((aux*) idThread);
+    int linha = idT.linha, j, cinza;
+    pixel *mat = idT.mat[linha];
 
-    for(j=0; j< idT.width ; j++){
-        cinza = idT.mat[j] matriz[idT][j].red*0.3 + matriz[idT][j].greem*0.59 + matriz[idT][j].blue*0.11;
-        matriz[idT][j].red = cinza;
-        matriz[idT][j].greem = cinza;
-        matriz[idT][j].blue = cinza;
+    for(j=0; j< idT.width; j++){
+        cinza = mat[j].red*0.3 + mat[j].greem*0.3 + mat[j].blue*0.3;
+        mat[j].red = cinza;
+        mat[j].greem = cinza;
+        mat[j].blue = cinza;
     }
     
     pthread_exit(NULL);
