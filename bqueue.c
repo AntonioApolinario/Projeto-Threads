@@ -22,7 +22,7 @@ typedef struct{
     int codigo;
 }estructAux;
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex;
 pthread_cond_t produzir[PRODUTORAS];
 pthread_cond_t consumir[CONSUMIDORAS];
 pthread_cond_t fill = PTHREAD_COND_INITIALIZER;
@@ -64,10 +64,11 @@ int main(int argc, char* argv[]){
 BlockingQueue *newBlockingQueue(unsigned int SizeBuffer){
     BlockingQueue * fila = (BlockingQueue*)malloc(sizeof(BlockingQueue));
     Elem * sentinela = (Elem*)malloc(sizeof(Elem));
+    sentinela->prox = NULL;
     fila->sizeBuffer = SizeBuffer;
     fila->statusBuffer = 0;
     fila->head = sentinela;
-    fila->last = NULL;
+    fila->last = sentinela;
 
     return fila;    
 }
@@ -80,7 +81,7 @@ void putBlockingQueue(BlockingQueue *Q, int newValue){
     if(Q->head != Q->last){
         Q->last->prox = newElem;
         Q->last = newElem;
-        printf("foi aqui\n");
+        
     }
     else{
         Q->head->prox = newElem;
@@ -103,9 +104,10 @@ void * produtora(void * aux){
     estructAux *filaBlock = (estructAux*)aux;
     int threadId = filaBlock->codigo;
     int x;
-    //Elem *cursor;     
+    Elem *cursor;     
 
     while(true){
+        pthread_mutex_init(&mutex, NULL);
         pthread_mutex_lock(&mutex);
         while(filaBlock->fb->statusBuffer == BUFFER){
             pthread_cond_wait(&empty, &mutex);
@@ -118,15 +120,16 @@ void * produtora(void * aux){
         x = rand()%100;
 
         putBlockingQueue(filaBlock->fb, x);
-        printf("foi aqui\n");
-        //cursor = filaBlock->fb->head->prox;
+        //printf("foi aqui\n");
+        cursor = filaBlock->fb->head->prox;
         
 
-        /* while(cursor->prox != NULL){
+        while(cursor->prox != NULL){
             printf("Valor %d, ", cursor->value);
             cursor =  cursor->prox;
         }
-         */
+        printf("\n");
+        
         if(threadId +1 == PRODUTORAS)
             pthread_cond_signal(&produzir[0]);
         else{
@@ -135,11 +138,14 @@ void * produtora(void * aux){
 
         pthread_cond_destroy(&produzir[threadId]);
 
-        if(filaBlock->fb->statusBuffer == 0)
+        if(filaBlock->fb->statusBuffer == BUFFER){
             pthread_cond_signal(&fill);
+            printf("Dizer que encheu\n");
+        }
         
         pthread_mutex_unlock(&mutex);
-        printf("Deu certo %d\n", x);
+        pthread_mutex_destroy(&mutex);
+        printf("Fim do while da produtora %d\n", threadId);
     }
 }
 
@@ -151,18 +157,22 @@ void * consumidora(void * aux){
     estructAux *filaBlock = (estructAux*)aux;
     int threadId = filaBlock->codigo;
     int x;
-
+    printf("Entrou consumidora %d\n", threadId);
     while(true){
+        pthread_mutex_init(&mutex, NULL);
         pthread_mutex_lock(&mutex);
-        while(filaBlock->fb->statusBuffer != 0){
+        //printf("Entrou aqui2\n");
+        while(filaBlock->fb->statusBuffer == 0){
             pthread_cond_wait(&fill, &mutex);
+            
         }
+        printf("Entrou aqui2\n");
 
         pthread_cond_init(&consumir[threadId], NULL);
         while (filaBlock->fb->statusBuffer != 0){
             pthread_cond_wait(&consumir[threadId], &mutex);
         }
-        printf("E pra colocar algo aqui\n");
+        
 
         putBlockingQueue(filaBlock->fb, x);
         
@@ -174,9 +184,12 @@ void * consumidora(void * aux){
 
         pthread_cond_destroy(&consumir[threadId]);
 
-        if(filaBlock->fb->statusBuffer == BUFFER)
+        if(filaBlock->fb->statusBuffer == 0){
             pthread_cond_signal(&empty);
-        
+            printf("E pra colocar algo aqui\n");
+        }
+
         pthread_mutex_unlock(&mutex);
+        pthread_mutex_destroy(&mutex);
     }
 }
