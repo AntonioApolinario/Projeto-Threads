@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<pthread.h>
 
+
 int matrizA[2][2] = {{2, 1},
                      {5, 7}};
 
