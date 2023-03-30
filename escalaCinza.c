@@ -43,10 +43,8 @@ int main(int argc, char *argv[]){
     }
 
     for(i=0; i<altura; i++){
-        printf("Linha %d\n", i);
         for(j=0; j<largura; j++){
             fscanf(colorida, "%d %d %d\n", &matriz[i][j].red, &matriz[i][j].greem, &matriz[i][j].blue);
-            printf("Vermelho %d, Verde %d, Azul %d\n", matriz[i][j].red, matriz[i][j].greem, matriz[i][j].blue);
         }
     }
 
