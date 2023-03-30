@@ -1,11 +1,11 @@
-
+//Só funciona quando os arquivos das imagens tem o número mágico = P3
+//O número de threads é igual ao numero de pixels da altura da imagem
 #include<stdio.h>
 #include<stdlib.h>
 #include<pthread.h>
 
 #define PATH_COLOR "imagem.ppm" //caminho da imagem colorida
 #define PATH_CINZA "cinza.ppm" //caminho da imagem em escala de cinza
-//#define NUM_THREADS 4
 
 typedef struct{
     int red, greem, blue;
