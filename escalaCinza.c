@@ -66,8 +66,11 @@ int main(int argc, char *argv[]){
             fprintf(cinza, "%d %d %d\n", matriz[i][j].red, matriz[i][j].greem, matriz[i][j].blue);
         }
     }
-    /* for(i=0; i<10)
-    free(matriz); */
+
+    for(i=0; i<altura; i++){
+        free(matriz[i]);
+    }
+    free(matriz);
 
     pthread_exit(NULL);
 }
