@@ -64,7 +64,9 @@ int main() {
   
     for(i = 0; i < NTHREADS; i++)
     {
-        pthread_join(threads[i],NULL);
+        float result
+        pthread_join(threads[i],(void*)result);
+        printf(%f,result);
     }
   
     pthread_barrier_destroy(&barrier);
