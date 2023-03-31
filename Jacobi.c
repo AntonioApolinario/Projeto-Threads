@@ -56,9 +56,9 @@ int main() {
 	for(i = 0; i < NTHREADS; i++) 
     {
 		ids[i] = malloc(sizeof(Coordenada)); 
-		ids[i]->Tid = i;
-        ids[i]->coluna = i;
-        ids[i]->linha = i;
+		*ids[i]->Tid = i;
+        *ids[i]->coluna = i;
+        *ids[i]->linha = i;
   	    pthread_create(&threads[i],NULL,threadCode,(void *) ids[i]);
          
     }
