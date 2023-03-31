@@ -169,9 +169,10 @@ void * consumidora(void * aux){
         printf("Entrou aqui2\n");
 
         pthread_cond_init(&consumir[threadId], NULL);
-        while (filaBlock->fb->statusBuffer != 0){
-            pthread_cond_wait(&consumir[threadId], &mutex);
-        }
+        /* while (filaBlock->fb->statusBuffer != 0){
+            
+        } */
+        pthread_cond_wait(&consumir[threadId], &mutex);
         
 
         putBlockingQueue(filaBlock->fb, x);

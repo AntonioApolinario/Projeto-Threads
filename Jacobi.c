@@ -27,9 +27,8 @@ void *threadCode(void *tid){
     int column = coord.coluna;
     float *res = (float*)malloc(sizeof(float));
     *res = 0;
-    int threadId = (coord.Tid); 
-	
-
+    int threadId = (coord.Tid);
+    
 	    for(i = 0; i < NTHREADS; i++)
         {
             x1[0]=1;
@@ -52,6 +51,7 @@ int main() {
     int i;
 	
 	pthread_barrier_init(&barrier, NULL, 2);
+    
 	
 	for(i = 0; i < NTHREADS; i++) 
     {
@@ -59,14 +59,15 @@ int main() {
 		ids[i]->Tid = i;
         ids[i]->coluna = i;
         ids[i]->linha = i;
-  	    pthread_create(&threads[i],NULL,threadCode,(void *) ids[i]);  
+  	    pthread_create(&threads[i],NULL,threadCode,(void *) ids[i]);
+         
     }
   
     for(i = 0; i < NTHREADS; i++)
     {
-        float result
-        pthread_join(threads[i],(void*)result);
-        printf(%f,result);
+        float *result;
+        pthread_join(threads[i], (void*)&result);
+        printf("%f",*result);
     }
   
     pthread_barrier_destroy(&barrier);
